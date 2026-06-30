@@ -19,12 +19,27 @@ are handy for diagnosing exactly that crash.
 
 ## Install
 
-```bash
-pip install -e .
-```
-
 Requires Python ≥ 3.10, a working BlueZ stack, and a Bluetooth adapter
 (`bluetoothctl list` should show a controller).
+
+For local development:
+
+```bash
+pip install -e ".[dev]"
+```
+
+For a system service, install into an isolated venv so the daemon does not
+depend on the system Python's packages:
+
+```bash
+sudo python3 -m venv /opt/venusd-ble-mqtt
+sudo /opt/venusd-ble-mqtt/bin/pip install .      # run from the repo checkout
+```
+
+This gives you `/opt/venusd-ble-mqtt/bin/venusd-ble-mqtt`. (A plain
+`sudo pip install .` instead drops the entry point at
+`/usr/local/bin/venusd-ble-mqtt`, which is what the bundled unit file expects —
+adjust `ExecStart` if you use the venv path.)
 
 ## Usage
 
@@ -90,21 +105,35 @@ venusd/status     online | offline   (retained availability)
 All are read-only. The device write path (e.g. local-API enable, power
 settings) is intentionally **not** implemented here.
 
-## systemd
+## Run as a systemd service
 
-```ini
-[Unit]
-Description=Marstek BLE to MQTT poller
-After=bluetooth.target network-online.target
+A ready-to-use, hardened unit file ships in the repo as
+[`venusd-ble-mqtt.service`](venusd-ble-mqtt.service). To install it:
 
-[Service]
-ExecStart=/usr/local/bin/venusd-ble-mqtt -c /etc/venusd-ble-mqtt.ini
-Restart=on-failure
-RestartSec=10
+```bash
+# 1. Install the package (see Install above) so the binary exists.
+# 2. Drop your config where the unit expects it.
+sudo cp venusd-ble-mqtt.example.ini /etc/venusd-ble-mqtt.ini
+sudo $EDITOR /etc/venusd-ble-mqtt.ini      # set address, mqtt_host, etc.
 
-[Install]
-WantedBy=multi-user.target
+# 3. Install and enable the service.
+sudo cp venusd-ble-mqtt.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now venusd-ble-mqtt.service
 ```
+
+Check it is running and watch the logs:
+
+```bash
+systemctl status venusd-ble-mqtt.service
+journalctl -u venusd-ble-mqtt.service -f
+```
+
+The unit runs as `root` by default because BlueZ normally requires it to
+connect to a peripheral, and `ExecStart` points at
+`/usr/local/bin/venusd-ble-mqtt` — edit it if you installed into the
+`/opt` venv from the Install section. Header comments in the file explain how
+to run unprivileged and which hardening options to relax if BLE access fails.
 
 ## License
 

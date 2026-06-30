@@ -1,0 +1,36 @@
+[Unit]
+Description=venusd-ble-mqtt — Marstek Venus/HM BLE-to-MQTT poller
+Documentation=https://github.com/
+# BlueZ must be up before we can talk to the adapter; MQTT needs the network.
+After=bluetooth.target network-online.target
+Wants=network-online.target
+Requires=bluetooth.service
+
+[Service]
+Type=simple
+# Adjust the path if you installed into a venv (see README), e.g.
+#   ExecStart=/opt/venusd-ble-mqtt/bin/venusd-ble-mqtt -c /etc/venusd-ble-mqtt.ini
+ExecStart=/usr/local/bin/venusd-ble-mqtt -c /etc/venusd-ble-mqtt.ini
+# The daemon handles SIGTERM/SIGINT for a clean BLE/MQTT shutdown.
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=20
+
+# --- Hardening ----------------------------------------------------------
+# BlueZ access goes over the system D-Bus (AF_UNIX); MQTT over AF_INET*.
+# Runs as root by default because connecting to a BLE peripheral via BlueZ
+# normally requires it. To run unprivileged instead, create a dedicated user
+# in the 'bluetooth' group, add a BlueZ D-Bus/polkit rule allowing it to
+# connect, and set User=/Group= below.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ProtectControlGroups=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+RestrictRealtime=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_BLUETOOTH
+
+[Install]
+WantedBy=multi-user.target
