@@ -2,7 +2,7 @@
 
 import pytest
 
-from marstek_ble_mqtt import config as c
+from venusd_ble_mqtt import config as c
 
 
 def test_default_abnormal_timeout():
@@ -32,11 +32,11 @@ def test_unknown_command_in_config_raises(tmp_path):
 
 def test_explicit_missing_path_raises():
     with pytest.raises(FileNotFoundError):
-        c.load_config("/no/such/marstek-ble-mqtt.ini")
+        c.load_config("/no/such/venusd-ble-mqtt.ini")
 
 
 def test_default_config_discovery_picks_first(tmp_path, monkeypatch):
-    cfgfile = tmp_path / "marstek-ble-mqtt.ini"
+    cfgfile = tmp_path / "venusd-ble-mqtt.ini"
     cfgfile.write_text("[poll]\ninterval = 7\n")
     monkeypatch.setattr(c, "DEFAULT_CONFIG_PATHS", [str(cfgfile)])
     assert c.find_default_config() == str(cfgfile)

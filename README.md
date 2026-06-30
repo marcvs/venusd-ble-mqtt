@@ -1,4 +1,4 @@
-# marstek-ble-mqtt
+# venusd-ble-mqtt
 
 Poll a Marstek **Venus / HM-series** battery over **Bluetooth Low Energy** and
 publish its telemetry to **MQTT**. Headless-Linux friendly, no Home Assistant
@@ -37,7 +37,7 @@ bluetoothctl scan on   # look for MST_ACCP (battery) or MST-TPM (meter)
 Then either pass everything on the CLI:
 
 ```bash
-marstek-ble-mqtt --address AA:BB:CC:DD:EE:FF \
+venusd-ble-mqtt --address AA:BB:CC:DD:EE:FF \
                  --mqtt-host localhost \
                  --interval 120 \
                  --commands runtime,bms,system
@@ -46,21 +46,21 @@ marstek-ble-mqtt --address AA:BB:CC:DD:EE:FF \
 …or use a config file (CLI flags override file values):
 
 ```bash
-cp marstek-ble-mqtt.example.ini /etc/marstek-ble-mqtt.ini
-$EDITOR /etc/marstek-ble-mqtt.ini
-marstek-ble-mqtt -c /etc/marstek-ble-mqtt.ini
+cp venusd-ble-mqtt.example.ini /etc/venusd-ble-mqtt.ini
+$EDITOR /etc/venusd-ble-mqtt.ini
+venusd-ble-mqtt -c /etc/venusd-ble-mqtt.ini
 ```
 
 Test a single cycle without committing to the loop:
 
 ```bash
-marstek-ble-mqtt --address AA:BB:CC:DD:EE:FF --once --publish-raw --log-level DEBUG
+venusd-ble-mqtt --address AA:BB:CC:DD:EE:FF --once --publish-raw --log-level DEBUG
 ```
 
 List supported commands:
 
 ```bash
-marstek-ble-mqtt --list-commands
+venusd-ble-mqtt --list-commands
 ```
 
 ## MQTT topics
@@ -68,10 +68,10 @@ marstek-ble-mqtt --list-commands
 One retained-or-not JSON document per command under the prefix:
 
 ```
-marstek/runtime    {"in1_power_w": 78, "wifi_connected": true, ...}
-marstek/bms        {"soc_pct": 62, "soh_pct": 98, "cell_delta_v": 0.012, ...}
-marstek/system     {"system_status": 1, "system_normal": true, ...}
-marstek/status     online | offline   (retained availability)
+venusd/runtime    {"in1_power_w": 78, "wifi_connected": true, ...}
+venusd/bms        {"soc_pct": 62, "soh_pct": 98, "cell_delta_v": 0.012, ...}
+venusd/system     {"system_status": 1, "system_normal": true, ...}
+venusd/status     online | offline   (retained availability)
 ```
 
 ## Supported commands
@@ -98,7 +98,7 @@ Description=Marstek BLE to MQTT poller
 After=bluetooth.target network-online.target
 
 [Service]
-ExecStart=/usr/local/bin/marstek-ble-mqtt -c /etc/marstek-ble-mqtt.ini
+ExecStart=/usr/local/bin/venusd-ble-mqtt -c /etc/venusd-ble-mqtt.ini
 Restart=on-failure
 RestartSec=10
 

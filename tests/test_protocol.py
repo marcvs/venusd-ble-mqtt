@@ -2,8 +2,8 @@
 
 import struct
 
-from marstek_ble_mqtt import protocol as p
-from marstek_ble_mqtt.ble import MarstekBLE
+from venusd_ble_mqtt import protocol as p
+from venusd_ble_mqtt.ble import VenusBLE
 
 
 def test_frame_roundtrip():
@@ -78,7 +78,7 @@ def test_event_record_timestamp():
 
 
 def test_chunked_reassembly():
-    ble = MarstekBLE(address="X")
+    ble = VenusBLE(address="X")
     full = p.build_frame(0x0D, bytes(15))
     ble._on_notify(None, bytearray(full[:6]))
     ble._on_notify(None, bytearray(full[6:]))
@@ -87,7 +87,7 @@ def test_chunked_reassembly():
 
 
 def test_resync_on_garbage_prefix():
-    ble = MarstekBLE(address="X")
+    ble = VenusBLE(address="X")
     full = p.build_frame(0x0D, bytes(15))
     ble._on_notify(None, bytearray(b"\xde\xad" + full))
     assert not ble._frame_q.empty()

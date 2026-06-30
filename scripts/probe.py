@@ -16,7 +16,7 @@ import sys
 from bleak import BleakClient, BleakScanner
 from bleak.exc import BleakError
 
-from marstek_ble_mqtt import protocol
+from venusd_ble_mqtt import protocol
 
 CANDIDATES = [
     "0000ff01-0000-1000-8000-00805f9b34fb",

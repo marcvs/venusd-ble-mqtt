@@ -5,6 +5,6 @@ __pycache__/
 build/
 dist/
 .pytest_cache/
-!marstek-ble-mqtt.example.ini
+!venusd-ble-mqtt.example.ini
 .venv/
 venv/

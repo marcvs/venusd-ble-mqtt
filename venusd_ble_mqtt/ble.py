@@ -25,11 +25,11 @@ from . import protocol
 log = logging.getLogger(__name__)
 
 
-class MarstekBLEError(Exception):
+class VenusBLEError(Exception):
     pass
 
 
-class MarstekBLE:
+class VenusBLE:
     def __init__(
         self,
         address: str | None = None,
@@ -71,7 +71,7 @@ class MarstekBLE:
             timeout=self.connect_timeout,
         )
         if device is None:
-            raise MarstekBLEError(
+            raise VenusBLEError(
                 f"No device advertising name prefix {self.name_prefix!r} found"
             )
         log.info("Found %s (%s)", device.name, device.address)
@@ -101,7 +101,7 @@ class MarstekBLE:
             del self._buf[:frame_len]
             self._frame_q.put_nowait(frame)
 
-    async def __aenter__(self) -> "MarstekBLE":
+    async def __aenter__(self) -> "VenusBLE":
         await self.connect()
         return self
 
@@ -147,7 +147,7 @@ class MarstekBLE:
                 await self.disconnect()
                 if attempt < self.connect_retries:
                     await asyncio.sleep(self.retry_delay)
-        raise MarstekBLEError(
+        raise VenusBLEError(
             f"Could not connect to {address} after "
             f"{self.connect_retries} attempts: {last}"
         )
@@ -174,7 +174,7 @@ class MarstekBLE:
     async def request(self, command: int, payload: bytes = b"") -> bytes:
         """Send a command frame and return the raw payload of the response."""
         if not self.is_connected:
-            raise MarstekBLEError("Not connected")
+            raise VenusBLEError("Not connected")
         # Drain any stale frames before issuing a fresh request.
         while not self._frame_q.empty():
             self._frame_q.get_nowait()
@@ -187,7 +187,7 @@ class MarstekBLE:
                 self._frame_q.get(), timeout=self.response_timeout
             )
         except asyncio.TimeoutError as e:
-            raise MarstekBLEError(
+            raise VenusBLEError(
                 f"Timeout waiting for response to command 0x{command:02x}"
             ) from e
 

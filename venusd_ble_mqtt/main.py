@@ -1,5 +1,5 @@
 """
-marstek-ble-mqtt: poll a Marstek Venus/HM battery over BLE and publish to MQTT.
+venusd-ble-mqtt: poll a Marstek Venus/HM battery over BLE and publish to MQTT.
 
 Designed for headless Linux with a local mosquitto broker. Polls a configurable
 subset of read-only BLE commands at a configurable interval and publishes one
@@ -18,17 +18,17 @@ import signal
 import sys
 
 from . import __version__
-from .ble import MarstekBLE, MarstekBLEError
+from .ble import VenusBLE, VenusBLEError
 from .config import Config, load_config
 from .mqtt import MqttPublisher
 from . import protocol
 
-log = logging.getLogger("marstek_ble_mqtt")
+log = logging.getLogger("venusd_ble_mqtt")
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="marstek-ble-mqtt",
+        prog="venusd-ble-mqtt",
         description="Poll a Marstek Venus/HM battery over BLE and publish to MQTT.",
     )
     p.add_argument(
@@ -133,7 +133,7 @@ async def _wait_events(timeout: float, *events: asyncio.Event) -> None:
             w.cancel()
 
 
-async def poll_once(ble: MarstekBLE, cfg: Config, pub: MqttPublisher) -> bool:
+async def poll_once(ble: VenusBLE, cfg: Config, pub: MqttPublisher) -> bool:
     """Run one full poll cycle. Returns False if the device reports an abnormal
     system state, in which case the (garbage) data is *not* published.
 
@@ -147,7 +147,7 @@ async def poll_once(ble: MarstekBLE, cfg: Config, pub: MqttPublisher) -> bool:
     for name in cfg.commands:
         try:
             results[name] = await ble.poll_command(name)
-        except MarstekBLEError as e:
+        except VenusBLEError as e:
             log.warning("Command %s failed: %s", name, e)
         except Exception as e:  # keep the loop alive on parser bugs
             log.exception("Unexpected error polling %s: %s", name, e)
@@ -193,7 +193,7 @@ async def run(cfg: Config, once: bool, stop: asyncio.Event) -> int:
     try:
         while not stop.is_set():
             try:
-                ble = MarstekBLE(
+                ble = VenusBLE(
                     address=cfg.address,
                     name_prefix=cfg.name_prefix,
                     notify_uuid=cfg.notify_uuid,
@@ -207,11 +207,11 @@ async def run(cfg: Config, once: bool, stop: asyncio.Event) -> int:
                     backoff = 5.0  # reset after a clean connect
                     abnormal_since: float | None = None
                     while not stop.is_set():
-                        # poll_once swallows per-command MarstekBLEErrors, so a
+                        # poll_once swallows per-command VenusBLEErrors, so a
                         # dropped link would otherwise loop forever logging
                         # "Not connected". Bail out to trigger a reconnect.
                         if not ble.is_connected:
-                            raise MarstekBLEError("BLE link dropped")
+                            raise VenusBLEError("BLE link dropped")
                         healthy = await poll_once(ble, cfg, pub)
                         if once:
                             return 0
@@ -235,13 +235,13 @@ async def run(cfg: Config, once: bool, stop: asyncio.Event) -> int:
                                     "%s to recover",
                                     now - abnormal_since, ble.resolved_address,
                                 )
-                                raise MarstekBLEError(
+                                raise VenusBLEError(
                                     "abnormal data persisted; forcing reconnect"
                                 )
                         # Interruptible sleep: wake early on shutdown or a
                         # dropped link so we don't waste a full interval.
                         await _wait_events(cfg.interval, stop, ble.disconnected)
-            except MarstekBLEError as e:
+            except VenusBLEError as e:
                 log.warning("BLE session ended: %s", e)
             except Exception as e:
                 log.exception("Unexpected session error: %s", e)

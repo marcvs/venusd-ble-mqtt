@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "marstek-ble-mqtt"
+name = "venusd-ble-mqtt"
 version = "0.1.0"
 description = "Poll a Marstek Venus/HM battery over BLE and publish telemetry to MQTT"
 readme = "README.md"
@@ -28,7 +28,7 @@ dev = [
 ]
 
 [project.scripts]
-marstek-ble-mqtt = "marstek_ble_mqtt.main:main"
+venusd-ble-mqtt = "venusd_ble_mqtt.main:main"
 
 [project.urls]
 Homepage = "https://github.com/"
@@ -36,4 +36,4 @@ Issues = "https://github.com/"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["marstek_ble_mqtt*"]
+include = ["venusd_ble_mqtt*"]

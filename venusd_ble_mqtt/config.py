@@ -13,9 +13,9 @@ log = logging.getLogger(__name__)
 
 # Searched in order when no config path is given explicitly; first hit wins.
 DEFAULT_CONFIG_PATHS = [
-    "marstek-ble-mqtt.ini",
-    os.path.expanduser("~/.config/marstek-ble-mqtt.ini"),
-    "/etc/marstek-ble-mqtt.ini",
+    "venusd-ble-mqtt.ini",
+    os.path.expanduser("~/.config/venusd-ble-mqtt.ini"),
+    "/etc/venusd-ble-mqtt.ini",
 ]
 
 
@@ -52,8 +52,8 @@ class Config:
     mqtt_port: int = 1883
     mqtt_username: str | None = None
     mqtt_password: str | None = None
-    mqtt_client_id: str = "marstek-ble-mqtt"
-    topic_prefix: str = "marstek"
+    mqtt_client_id: str = "venusd-ble-mqtt"
+    topic_prefix: str = "venusd"
     qos: int = 0
     retain: bool = False
     publish_raw: bool = False  # include raw hex fields in payloads

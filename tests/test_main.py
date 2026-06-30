@@ -2,13 +2,13 @@
 
 import asyncio
 
-from marstek_ble_mqtt import main as m
-from marstek_ble_mqtt.ble import MarstekBLEError
-from marstek_ble_mqtt.config import Config
+from venusd_ble_mqtt import main as m
+from venusd_ble_mqtt.ble import VenusBLEError
+from venusd_ble_mqtt.config import Config
 
 
 class FakeBLE:
-    """Stand-in for MarstekBLE that returns canned command results."""
+    """Stand-in for VenusBLE that returns canned command results."""
 
     def __init__(self, system_normal=True, fail=()):
         self.system_normal = system_normal
@@ -16,7 +16,7 @@ class FakeBLE:
 
     async def poll_command(self, name: str) -> dict:
         if name in self.fail:
-            raise MarstekBLEError(f"{name} boom")
+            raise VenusBLEError(f"{name} boom")
         if name == "system":
             return {
                 "system_status": 1 if self.system_normal else 116,
