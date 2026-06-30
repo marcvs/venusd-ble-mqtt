@@ -140,8 +140,10 @@ class VenusBLE:
                 return
             except (BleakError, EOFError, asyncio.TimeoutError) as e:
                 last = e
+                # repr(), not str(): EOFError/TimeoutError stringify to "" and
+                # would otherwise log a blank, hiding which failure it was.
                 log.warning(
-                    "Connect attempt %d/%d failed: %s",
+                    "Connect attempt %d/%d failed: %r",
                     attempt, self.connect_retries, e,
                 )
                 await self.disconnect()
@@ -149,7 +151,7 @@ class VenusBLE:
                     await asyncio.sleep(self.retry_delay)
         raise VenusBLEError(
             f"Could not connect to {address} after "
-            f"{self.connect_retries} attempts: {last}"
+            f"{self.connect_retries} attempts: {last!r}"
         )
 
     async def disconnect(self) -> None:
